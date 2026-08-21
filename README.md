@@ -18,8 +18,14 @@ contrata sabe exatamente o que faz um perfil passar.
 
 - **Tema claro/escuro** com persistência em `localStorage` e respeito à
   preferência do sistema (`prefers-color-scheme`).
-- **Scanner de ATS animado** no hero, com selo de _match_ que conta de 0 a 94%.
-- **Revelação ao rolar** (fade-up) usando `IntersectionObserver`.
+- **Scanner de ATS animado** no hero: folha de papel presa com fita crepe,
+  linha de varredura e carimbo de _match_ que conta de 0 a 94%.
+- **Ilustrações desenhadas à mão** (`Doodle`) que se desenham sozinhas ao
+  entrar na tela, via `pathLength` normalizado.
+- **Revelação ao rolar** com gestos variados (`rise`, `left`, `right`, `pop`,
+  `tape`) usando `IntersectionObserver`.
+- **Parallax de ponteiro** e inclinação 3D nos cartões, escritos direto no
+  `style` dentro de `requestAnimationFrame` — sem re-render por pixel.
 - **Formulário de leads** que monta um e-mail pré-preenchido (`mailto:`) — sem
   backend, pronto para trocar por Formspree, RD Station, WhatsApp etc.
 - **Acessibilidade**: `prefers-reduced-motion`, foco visível, `labels` e
@@ -36,6 +42,27 @@ contrata sabe exatamente o que faz um perfil passar.
 | **styled-components 6**        | CSS-in-JS com theming                               |
 | **react-intersection-observer**| Animações de entrada ao rolar (`Reveal`)            |
 | **ESLint**                     | Padronização e qualidade de código                  |
+
+## 🎨 Linguagem visual
+
+A página é desenhada como **papel sobre a mesa**, não como cartões de painel.
+Quem for mexer nela mantém estas regras:
+
+- **Nada perfeitamente alinhado.** Cards, post-its e a foto repousam tortos
+  (±2°) e se endireitam no hover. É o gesto de quem pega o papel para ler.
+- **Sombra dura, não difusa.** `box-shadow: Xpx Ypx 0 ${theme.shade}` — uma
+  cópia sólida deslocada. No tema escuro `shade` escurece; repetir o creme do
+  traço faria cada card brilhar.
+- **Curvas, nunca retas.** Os paths dos `Doodle` usam `C`/`S`; a imperfeição é
+  o que faz parecer caneta.
+- **Movimento com exagero no fim.** Use sempre `ease.spring`/`ease.soft` de
+  [`animations.ts`](src/styles/animations.ts), nunca `ease` cru — e varie o
+  gesto de entrada entre seções: movimento repetido denuncia página gerada.
+- **Três tipos com papéis fixos:** `--font-display` (Fraunces, com os eixos
+  SOFT/WONK) para títulos, `--font-body` (Nunito) para leitura e
+  `--font-hand` (Caveat) para bilhetes e anotações.
+- **Textura de papel** granulada por cima de tudo (`GlobalStyle`): fundo
+  chapado é o que mais entrega template.
 
 ## 🚀 Como rodar
 
@@ -78,19 +105,25 @@ npm run lint        # ESLint
    │  ├─ theme.ts            # tokens de cor dos temas claro/escuro
    │  ├─ styled.d.ts         # tipagem do `theme` no styled-components
    │  ├─ GlobalStyle.ts      # reset + estilos globais
-   │  └─ animations.ts       # keyframes (scan, fadeUp, pop, float)
+   │  └─ animations.ts       # curvas (`ease`) + keyframes de entrada,
+   │                          #   contínuas, traços e marcações
    ├─ theme/
    │  └─ ThemeContext.tsx    # provider de tema + hook useThemeMode
    ├─ hooks/
-   │  └─ useCountUp.ts        # animação numérica (match ATS / stats)
+   │  ├─ useCountUp.ts        # animação numérica (match ATS / stats)
+   │  ├─ useParallax.ts       # parallax de ponteiro + inclinação de cartão
+   │  └─ useScrollSpy.ts      # progresso de leitura, seção ativa, "rolou?"
    ├─ utils/
    │  └─ scroll.ts           # scroll suave até uma âncora
    └─ components/
       ├─ ui/                  # primitivos reutilizáveis
       │  ├─ Container.tsx
       │  ├─ Section.tsx
-      │  ├─ Button.tsx        # Button + Ghost
-      │  ├─ Heading.tsx       # Kicker, H2, SectionLead
+      │  ├─ Button.tsx        # Button + Ghost + TinyButton
+      │  ├─ Heading.tsx       # Kicker, H2, SectionLead, Mark, Circled
+      │  ├─ Doodle.tsx        # kit de rabiscos SVG feitos à mão
+      │  ├─ Decor.tsx         # blobs, rabiscos flutuantes, ponto que respira
+      │  ├─ Marquee.tsx       # faixa infinita entre seções
       │  └─ Reveal.tsx        # wrapper de animação ao rolar
       ├─ layout/
       │  ├─ Brand.tsx
@@ -115,6 +148,9 @@ npm run lint        # ESLint
 - **Cores e temas:** ajuste os tokens em
   [`src/styles/theme.ts`](src/styles/theme.ts). Como ambos os temas seguem a
   interface `AppTheme`, qualquer chave nova é checada pelo TypeScript.
+- **Acentos:** cada card, post-it e passo escolhe um acento (`rose`, `coral`,
+  `sage`, `ochre`, `lilac`) pelo próprio `content.ts` — trocar a cor de um
+  serviço é editar um campo, não um componente.
 - **Foto da Ana:** coloque `ana-beatriz.jpg` em `public/`. Enquanto o arquivo
   não existir, a seção "Sobre" mostra o monograma "AB" como fallback.
 - **E-mail / contato:** atualize `contact` em `src/data/content.ts`.
